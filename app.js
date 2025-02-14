@@ -2,6 +2,7 @@
 require('dotenv').config();
 const express = require('express');
 const adminRoutes = require('./routes/admin.routes');
+const profRoutes=require('./routes/professeur,routes')
 const client = require('./config/database'); 
 const pool = require('./config/database');
 
@@ -9,6 +10,7 @@ const app = express();
 
 app.use(express.json());
 app.use('/admin', adminRoutes);
+app.use('/user', profRoutes)
 
 app.get('/test-db', async (req, res) => {
     try {

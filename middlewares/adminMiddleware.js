@@ -24,4 +24,4 @@ const authenticateAdmin = (requiredRole = 'admin') => {
 };
 
 
-module.exports = { authenticateAdmin };
+module.exports = authenticateAdmin;
