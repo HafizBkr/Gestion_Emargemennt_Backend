@@ -1,0 +1,2 @@
+INSERT INTO admins (email, password) VALUES 
+    ('hafiz@gmail.com', '12345678');
