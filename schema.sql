@@ -6,4 +6,5 @@ CREATE TABLE admins (
     password TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+ALTER TABLE admins ADD COLUMN role character varying(50) NOT NULL DEFAULT 'admin';
 

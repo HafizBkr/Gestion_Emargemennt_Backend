@@ -1,25 +1,10 @@
 const bcrypt = require('bcryptjs');
 const pool = require('../config/database');
 
-// Fonction pour afficher la base de données courante
-const showCurrentDatabase = async () => {
+// Create an admin with role
+const createAdmin = async (email, password, role = 'admin') => {
     try {
-        const query = 'SELECT current_database()';
-        const res = await pool.query(query);
-        console.log('Base de données courante:', res.rows[0].current_database);
-    } catch (error) {
-        console.error('Erreur lors de la récupération de la base de données courante:', error);
-        throw error;
-    }
-};
-
-// Fonction pour créer un administrateur
-const createAdmin = async (email, password) => {
-    try {
-        // Afficher la base de données courante
-        await showCurrentDatabase();
-
-        // Vérifier si l'email existe déjà
+        // Check if the email already exists
         const checkEmailQuery = 'SELECT * FROM admins WHERE email = $1';
         const checkEmailRes = await pool.query(checkEmailQuery, [email]);
 
@@ -27,24 +12,24 @@ const createAdmin = async (email, password) => {
             throw new Error('Cet email est déjà utilisé');
         }
 
-        // Hachage du mot de passe
+        // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Insérer l'administrateur dans la base de données
-        const insertQuery = 'INSERT INTO admins (email, password) VALUES ($1, $2) RETURNING *';
-        const result = await pool.query(insertQuery, [email, hashedPassword]);
+        // Insert the admin with role into the database
+        const insertQuery = 'INSERT INTO admins (email, password, role) VALUES ($1, $2, $3) RETURNING *';
+        const result = await pool.query(insertQuery, [email, hashedPassword, role]);
 
-        return result.rows[0]; // Retourner l'administrateur créé
+        return result.rows[0]; // Return the created admin
     } catch (error) {
         console.error('Erreur lors de la création de l\'administrateur:', error);
         throw error;
     }
 };
 
-// Fonction pour vérifier la connexion d'un administrateur
+// Verify admin login
 const loginAdmin = async (email, password) => {
     try {
-        // Récupérer l'administrateur par email
+        // Get the admin by email
         const query = 'SELECT * FROM admins WHERE email = $1';
         const result = await pool.query(query, [email]);
 
@@ -58,7 +43,7 @@ const loginAdmin = async (email, password) => {
             throw new Error('Email ou mot de passe incorrect');
         }
 
-        return admin; // Retourner l'administrateur si le mot de passe est valide
+        return admin; // Return the admin if password is valid
     } catch (error) {
         console.error('Erreur lors de la connexion de l\'administrateur:', error);
         throw error;
