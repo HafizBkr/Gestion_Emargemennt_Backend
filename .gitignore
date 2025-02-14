@@ -1,0 +1,26 @@
+# Node modules
+node_modules/
+
+# Fichiers de logs
+*.log
+
+# Dossiers et fichiers de la configuration d'IDE (par exemple VSCode, WebStorm)
+.vscode/
+.idea/
+
+# Fichiers d'environnement (éviter de commettre des secrets)
+.env
+
+# Fichiers de système (macOS, Windows, etc.)
+.DS_Store
+Thumbs.db
+
+# Fichiers de tests (si vous avez un dossier de tests spécifique)
+test/
+
+# Si vous utilisez un répertoire de build
+/dist/
+build/
+
+# Autres fichiers temporaires
+*.tmp
