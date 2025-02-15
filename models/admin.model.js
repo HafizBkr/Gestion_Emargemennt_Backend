@@ -9,7 +9,7 @@ const createAdmin = async (email, password, role = 'admin') => {
         const checkEmailRes = await pool.query(checkEmailQuery, [email]);
 
         if (checkEmailRes.rows.length > 0) {
-            throw new Error('Cet email est déjà utilisé');
+                throw new Error('Cet email est déjà utilisé');
         }
 
         // Hash the password

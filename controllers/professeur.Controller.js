@@ -3,11 +3,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 class ProfesseurController {
-    // Créer un professeur
     async createProfesseur(req, res) {
         const { nom, email, telephone, titre, role, actif, mot_de_passe } = req.body;
-
-        // Vérifier si l'email est déjà utilisé
         try {
             const professeurExistant = await professeurModel.getProfesseurByEmail(email);
             if (professeurExistant) {
@@ -16,16 +13,12 @@ class ProfesseurController {
         } catch (error) {
             return res.status(500).json({ error: `Erreur lors de la vérification de l'email: ${error.message}` });
         }
-
-        // Hacher le mot de passe
         let hashedPassword;
         try {
             hashedPassword = await bcrypt.hash(mot_de_passe.trim(), 10); // Utiliser .trim() pour supprimer les espaces blancs
         } catch (error) {
             return res.status(500).json({ error: `Erreur lors du hachage du mot de passe: ${error.message}` });
-        }
-
-        // Créer le professeur
+        }3 
         try {
             const professeur = await professeurModel.createProfesseur({
                 nom,
