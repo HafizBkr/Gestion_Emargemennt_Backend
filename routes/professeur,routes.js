@@ -8,27 +8,8 @@ router.post('/professeurs', authenticateAdmin('admin'), professeurController.cre
 router.put('/professeurs/:id/change-password', professeurController.changePassword);
 router.get('/professeurs', authenticateAdmin('admin'),professeurController.getAllProfesseurs);
 router.get('/professeurs/:id', authenticateAdmin('admin'),professeurController.getProfesseurById);
+router.put('/professeurs/:id', authenticateAdmin('admin'), professeurController.updateProfesseur);
+router.delete('/professeurs/:id', authenticateAdmin('admin'), professeurController.deleteProfesseur);
 
-
-
-
-// Routes protégées pour gérer les professeurs
-router.get('/professeurs', authenticateAdmin, (req, res) => {
-    professeurController.getAllProfesseurs(req, res);
-});
-
-router.get('/professeurs/:id', authenticateAdmin, (req, res) => {
-    professeurController.getProfesseurById(req, res);
-});
-
-
-
-router.put('/professeurs/:id', authenticateAdmin, (req, res) => {
-    professeurController.updateProfesseur(req, res);
-});
-
-router.delete('/professeurs/:id', authenticateAdmin, (req, res) => {
-    professeurController.deleteProfesseur(req, res);
-});
 
 module.exports = router;

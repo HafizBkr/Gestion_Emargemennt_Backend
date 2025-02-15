@@ -22,5 +22,4 @@ app.get('/test-db', async (req, res) => {
     }
 });
 
-// Exporter l'application pour l'utiliser dans d'autres fichiers si nécessaire
 module.exports = app;
