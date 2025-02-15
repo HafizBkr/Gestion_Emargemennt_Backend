@@ -10,6 +10,7 @@ router.get('/professeurs', authenticateAdmin('admin'),professeurController.getAl
 router.get('/professeurs/:id', authenticateAdmin('admin'),professeurController.getProfesseurById);
 router.put('/professeurs/:id', authenticateAdmin('admin'), professeurController.updateProfesseur);
 router.delete('/professeurs/:id', authenticateAdmin('admin'), professeurController.deleteProfesseur);
+router.patch('/professeurs/:id/activation', authenticateAdmin('admin'),professeurController.toggleActivationProfesseur);
 
 
 module.exports = router;
