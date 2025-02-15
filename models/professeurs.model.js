@@ -109,6 +109,19 @@ class ProfesseurModel {
             [id]
         );
     }
+
+        // Activer ou désactiver un professeur
+        async toggleActivation(id) {
+            const result = await pool.query(
+                `UPDATE professeurs 
+                SET actif = NOT actif, date_mise_a_jour = now()
+                WHERE id = $1 
+                RETURNING *;`,
+                [id]
+            );
+            return result.rows[0];
+        }
+    
 }
 
 module.exports = new ProfesseurModel();

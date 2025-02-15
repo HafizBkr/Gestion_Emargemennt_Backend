@@ -173,6 +173,25 @@ class ProfesseurController {
             res.status(400).json({ error: error.message });
         }
     }
+
+        // Activer ou désactiver un professeur
+        async toggleActivationProfesseur(req, res) {
+            const { id } = req.params;
+            
+            try {
+                const professeur = await professeurModel.toggleActivation(id);
+                if (!professeur) {
+                    return res.status(404).json({ error: "Professeur non trouvé" });
+                }
+                res.status(200).json({ 
+                    message: `Le compte du professeur a été ${professeur.actif ? "activé" : "désactivé"}.`, 
+                    professeur 
+                });
+            } catch (error) {
+                res.status(500).json({ error: `Erreur lors de la mise à jour de l'activation: ${error.message}` });
+            }
+        }
+    
 }
 
 module.exports = new ProfesseurController();
