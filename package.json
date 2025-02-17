@@ -15,9 +15,11 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^6.10.0",
     "pg": "^8.13.3",
     "pg-hstore": "^2.3.4",
-    "sequelize": "^6.37.5"
+    "sequelize": "^6.37.5",
+    "twilio": "^5.4.4"
   },
   "devDependencies": {
     "nodemon": "^2.0.15"

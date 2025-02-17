@@ -202,6 +202,18 @@ async getProfesseursByDomaine(domaine_id) {
     return result.rows;
 }
 
+ async getProfesseurById(id) {
+    try {
+        const result = await pool.query(
+            'SELECT id, nom, email, telephone FROM public.professeurs WHERE id = $1',
+            [id]
+        );
+        return result.rows[0]; // Retourne les informations du professeur
+    } catch (error) {
+        console.error("Erreur lors de la récupération du professeur:", error);
+        throw new Error('Erreur lors de la récupération des informations du professeur');
+    }
+}
 }
 
 module.exports = new ProfesseurModel();
