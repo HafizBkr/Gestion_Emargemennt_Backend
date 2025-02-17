@@ -3,7 +3,17 @@ const ProgrammeModel = require('../models/programes.model');
 class ProgrammeController {
     async createProgramme(req, res) {
         try {
-            const programme = await ProgrammeModel.createProgramme(req.body);
+            const { specialite_id, matiere, code_matiere, nombre_credits, volume_horaire, annee_scolaire_id } = req.body;
+
+            // Vérifier si l'année scolaire est valide
+            if (!annee_scolaire_id) {
+                return res.status(400).json({ message: "L'année scolaire est obligatoire" });
+            }
+
+            const programme = await ProgrammeModel.createProgramme({
+                specialite_id, matiere, code_matiere, nombre_credits, volume_horaire, annee_scolaire_id
+            });
+
             res.status(201).json(programme);
         } catch (error) {
             res.status(500).json({ message: error.message });

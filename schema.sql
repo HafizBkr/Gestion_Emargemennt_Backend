@@ -91,6 +91,9 @@ CREATE TABLE programmes (
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (specialite_id) REFERENCES specialites(id) ON DELETE CASCADE
 );
+ALTER TABLE programmes
+ADD COLUMN annee_scolaire_id UUID REFERENCES annees_scolaires(id) ON DELETE CASCADE;
+
 
 
 CREATE OR REPLACE FUNCTION update_timestamp()
@@ -109,10 +112,62 @@ EXECUTE FUNCTION update_timestamp();
 
 CREATE TABLE salles (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    nom VARCHAR(100) NOT NULL UNIQUE,
-    capacite INT CHECK (capacite > 0),
-    equipements TEXT, -- Liste des équipements sous forme de texte (ex: "projecteur, tableau, climatisation")
+    nom VARCHAR(100) NOT NULL,
+    capacite INT NOT NULL CHECK (capacite > 0),
+    equipements TEXT,
     disponible BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+ALTER TABLE salles ADD COLUMN etage INT;
+
+
+CREATE TABLE annees_scolaires (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE seances (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    programme_id UUID NOT NULL REFERENCES programmes(id) ON DELETE CASCADE,  -- La matière enseignée
+    professeur_id UUID NOT NULL REFERENCES professeurs(id) ON DELETE CASCADE, -- Le professeur qui enseigne
+    salle_id UUID NOT NULL REFERENCES salles(id) ON DELETE SET NULL, -- La salle où se déroule le cours
+    date_seance DATE NOT NULL,   -- La date de la séance
+    heure_debut TIME NOT NULL,   -- Heure de début
+    heure_fin TIME NOT NULL,     -- Heure de fin
+    heures_effectuees INT GENERATED ALWAYS AS (EXTRACT(EPOCH FROM (heure_fin - heure_debut)) / 3600) STORED, -- Calcule automatique des heures
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Trigger pour mettre à jour la date de mise à jour automatiquement
+CREATE TRIGGER update_seances_timestamp
+BEFORE UPDATE ON seances
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();
+
+
+CREATE TABLE seances (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),  -- ID unique pour chaque séance
+    date DATE NOT NULL,                             -- Date de la séance
+    heure_debut TIME NOT NULL,                     -- Heure de début de la séance
+    heure_fin TIME NOT NULL,                       -- Heure de fin de la séance
+    programme_id UUID NOT NULL,                    -- ID du programme lié à la séance
+    professeur_id UUID NOT NULL,                   -- ID du professeur lié à la séance
+    salle_id UUID NOT NULL,                        -- ID de la salle de la séance
+    statut VARCHAR(50) NOT NULL DEFAULT 'en cours',-- Statut de la séance (en cours, programmée, etc.)
+    est_en_cours BOOLEAN NOT NULL DEFAULT false,   -- Indicateur si la séance est en cours
+    CONSTRAINT fk_programme FOREIGN KEY (programme_id) REFERENCES programmes(id), -- Relation avec la table programmes
+    CONSTRAINT fk_professeur FOREIGN KEY (professeur_id) REFERENCES professeurs(id), -- Relation avec la table professeurs
+    CONSTRAINT fk_salle FOREIGN KEY (salle_id) REFERENCES salles(id) -- Relation avec la table salles
+);
+
+-- Trigger pour mettre à jour la date de mise à jour automatiquement
+CREATE TRIGGER update_seances_timestamp
+BEFORE UPDATE ON seances
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();

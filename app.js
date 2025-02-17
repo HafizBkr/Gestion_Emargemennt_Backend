@@ -9,8 +9,10 @@ const fillieresRoutes=require('./routes/fillieres.routes');
 const niveauRoutes=require('./routes/niveau.routes');
 const specialiteRoutes=require('./routes/specialite.routres');
 const programeRoutes=require('./routes/programes.routes')
+const sallesRoutes=require('./routes/salles.routes')
+const anneeRoutes=require('./routes/anees.routes')
+const seanceRoutes=require('./routes/seance.routes');
 
-const client = require('./config/database'); 
 const pool = require('./config/database');
 
 const app = express();
@@ -23,6 +25,9 @@ app.use('/admin/fillieres', fillieresRoutes);
 app.use('/admin/niveau', niveauRoutes);
 app.use('/admin/specialite', specialiteRoutes);
 app.use('/admin/programes', programeRoutes);
+app.use('/admin/salles', sallesRoutes);
+app.use('/admin/annee', anneeRoutes);
+app.use('/admin/seance', seanceRoutes);
 
 app.get('/test-db', async (req, res) => {
     try {
