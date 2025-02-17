@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/admin.Controller');
-const professeurController = require('../controllers/professeur.Controller');
-const authenticateAdmin = require('../middlewares/adminMiddleware');
+
 
 // Route pour enregistrer un administrateur
 router.post('/register', adminController.registerAdmin);

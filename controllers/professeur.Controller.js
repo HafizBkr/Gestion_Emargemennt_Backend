@@ -41,27 +41,33 @@ class ProfesseurController {
     }
 
     // Récupérer tous les professeurs
-    async getAllProfesseurs(req, res) {
-        try {
-            const professeurs = await professeurModel.getAllProfesseurs();
-            res.status(200).json({ professeurs });
-        } catch (error) {
-            res.status(500).json({ error: `Erreur lors de la récupération des professeurs: ${error.message}` });
-        }
+    // Récupérer tous les professeurs avec leurs domaines
+async getAllProfesseurs(req, res) {
+    try {
+        const professeurs = await professeurModel.getAllProfesseurs();
+        res.status(200).json({ professeurs });
+    } catch (error) {
+        res.status(500).json({ error: `Erreur lors de la récupération des professeurs: ${error.message}` });
     }
+}
 
     // Récupérer un professeur par ID
-    async getProfesseurById(req, res) {
-        try {
-            const professeur = await professeurModel.getProfesseurById(req.params.id);
-            if (!professeur) {
-                return res.status(404).json({ error: "Professeur non trouvé" });
-            }
-            res.status(200).json({ professeur });
-        } catch (error) {
-            res.status(500).json({ error: `Erreur lors de la récupération du professeur: ${error.message}` });
+  // Récupérer un professeur par ID avec ses domaines associés
+async getProfesseurById(req, res) {
+    try {
+        const professeur = await professeurModel.getProfesseurById(req.params.id);
+        if (!professeur) {
+            return res.status(404).json({ error: "Professeur non trouvé" });
         }
+
+        // Récupérer les domaines associés au professeur
+        const domaines = await professeurModel.getDomainesProfesseur(req.params.id);
+
+        res.status(200).json({ professeur, domaines });
+    } catch (error) {
+        res.status(500).json({ error: `Erreur lors de la récupération du professeur: ${error.message}` });
     }
+}
 
     // Mettre à jour un professeur
     async updateProfesseur(req, res) {
@@ -184,6 +190,57 @@ class ProfesseurController {
                 res.status(500).json({ error: `Erreur lors de la mise à jour de l'activation: ${error.message}` });
             }
         }
+        async assignerDomaines(req, res) {
+            const { id: professeur_id } = req.params;
+            const { domaines } = req.body; // domaines = [id1, id2, ...]
+        
+            try {
+                const result = await professeurModel.assignerDomaines(professeur_id, domaines);
+                res.status(200).json(result);
+            } catch (error) {
+                res.status(500).json({ error: `Erreur lors de l'affectation des domaines: ${error.message}` });
+            }
+        }
+        
+        // 🔹 Récupérer les domaines d’un professeur
+        async  getDomainesProfesseur(req, res) {
+            const { id: professeur_id } = req.params;
+        
+            try {
+                const domaines = await professeurModel.getDomainesProfesseur(professeur_id);
+                res.status(200).json({ domaines });
+            } catch (error) {
+                res.status(500).json({ error: `Erreur lors de la récupération des domaines: ${error.message}` });
+            }
+        }
+        
+        // 🔹 Supprimer un domaine spécifique d’un professeur
+        async  supprimerDomaineProfesseur(req, res) {
+            const { id: professeur_id, domaine_id } = req.params;
+        
+            try {
+                const result = await professeurModel.supprimerDomaineProfesseur(professeur_id, domaine_id);
+                res.status(200).json(result);
+            } catch (error) {
+                res.status(500).json({ error: `Erreur lors de la suppression du domaine: ${error.message}` });
+            }
+        }
+    
+   // Récupérer les professeurs par domaine
+// Dans votre contrôleur professeurController.js
+async getProfesseursByDomaine(req, res) {
+    const { domaine_id } = req.params;
+
+    try {
+        const professeurs = await professeurModel.getProfesseursByDomaine(domaine_id);
+        res.status(200).json({ professeurs });
+    } catch (error) {
+        res.status(500).json({ error: `Erreur lors de la récupération des professeurs par domaine: ${error.message}` });
+    }
+}
+
+
+
     
 }
 

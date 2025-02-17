@@ -11,6 +11,8 @@ router.get('/professeurs/:id', authenticateAdmin('admin'),professeurController.g
 router.put('/professeurs/:id', authenticateAdmin('admin'), professeurController.updateProfesseur);
 router.delete('/professeurs/:id', authenticateAdmin('admin'), professeurController.deleteProfesseur);
 router.patch('/professeurs/:id/activation', authenticateAdmin('admin'),professeurController.toggleActivationProfesseur);
-
-
+router.post("/professeurs/:id/domaines", authenticateAdmin("admin"), professeurController.assignerDomaines);
+router.get("/professeurs/:id/domaines", authenticateAdmin("admin"), professeurController.getDomainesProfesseur);
+router.delete("/professeurs/:id/domaines/:domaine_id", authenticateAdmin("admin"), professeurController.supprimerDomaineProfesseur);
+router.get('/professeurs/domaine/:domaine_id', authenticateAdmin('admin'), professeurController.getProfesseursByDomaine);
 module.exports = router;

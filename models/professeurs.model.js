@@ -19,10 +19,17 @@ class ProfesseurModel {
     }
 
     // Récupérer tous les professeurs
-    async getAllProfesseurs() {
-        const result = await pool.query("SELECT * FROM professeurs;");
-        return result.rows;
-    }
+    // Récupérer tous les professeurs avec leurs domaines associés
+async getAllProfesseurs() {
+    const result = await pool.query(`
+        SELECT p.*, array_agg(d.nom) AS domaines
+        FROM professeurs p
+        LEFT JOIN professeur_domaine pd ON p.id = pd.professeur_id
+        LEFT JOIN domaines d ON pd.domaine_id = d.id
+        GROUP BY p.id;
+    `);
+    return result.rows;
+}
 
     // Récupérer un professeur par ID
     async getProfesseurById(id) {
@@ -121,7 +128,80 @@ class ProfesseurModel {
             );
             return result.rows[0];
         }
+
+        async assignerDomaines(professeur_id, domaines) {
+            if (!Array.isArray(domaines) || domaines.length === 0) {
+                throw new Error("Le tableau des domaines est invalide.");
+            }
     
+            const client = await pool.connect();
+            try {
+                await client.query("BEGIN");
+    
+                // Supprimer les anciennes associations
+                await client.query("DELETE FROM professeur_domaine WHERE professeur_id = $1;", [professeur_id]);
+    
+                // Insérer les nouvelles associations en une seule requête optimisée
+                const values = domaines.map((domaine_id) => `('${professeur_id}', '${domaine_id}')`).join(",");
+                await client.query(
+                    `INSERT INTO professeur_domaine (professeur_id, domaine_id) VALUES ${values} 
+                     ON CONFLICT DO NOTHING;`
+                );
+    
+                await client.query("COMMIT");
+                return { message: "Domaines mis à jour avec succès." };
+            } catch (error) {
+                await client.query("ROLLBACK");
+                throw error;
+            } finally {
+                client.release();
+            }
+        }
+    
+        // 🔹 Récupérer les domaines d'un professeur
+        async getDomainesProfesseur(professeur_id) {
+            const result = await pool.query(
+                `SELECT d.id, d.nom FROM domaines d
+                 INNER JOIN professeur_domaine pd ON d.id = pd.domaine_id
+                 WHERE pd.professeur_id = $1;`,
+                [professeur_id]
+            );
+            return result.rows;
+        }
+    
+        // 🔹 Supprimer un domaine spécifique d’un professeur
+        async supprimerDomaineProfesseur(professeur_id, domaine_id) {
+            const result = await pool.query(
+                `DELETE FROM professeur_domaine WHERE professeur_id = $1 AND domaine_id = $2 RETURNING *;`,
+                [professeur_id, domaine_id]
+            );
+            if (result.rowCount === 0) {
+                throw new Error("Aucune association trouvée.");
+            }
+            return { message: "Domaine supprimé avec succès." };
+        }
+    
+        // Récupérer les domaines associés à un professeur
+async getDomainesProfesseur(professeur_id) {
+    const result = await pool.query(
+        `SELECT d.* FROM domaines d
+         JOIN professeurs_domaines pd ON d.id = pd.domaine_id
+         WHERE pd.professeur_id = $1;`,
+        [professeur_id]
+    );
+    return result.rows;
+}
+  // Récupérer les professeurs associés à un domaine
+async getProfesseursByDomaine(domaine_id) {
+    const result = await pool.query(
+        `SELECT p.* FROM professeurs p
+         JOIN professeur_domaine pd ON p.id = pd.professeur_id
+         WHERE pd.domaine_id = $1;`,
+        [domaine_id]
+    );
+    return result.rows;
+}
+
 }
 
 module.exports = new ProfesseurModel();

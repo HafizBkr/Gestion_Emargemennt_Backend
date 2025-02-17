@@ -34,3 +34,47 @@ CREATE TABLE IF NOT EXISTS departements (
             date_creation TIMESTAMP DEFAULT NOW(),
             date_mise_a_jour TIMESTAMP DEFAULT NOW()
         );
+
+
+        -- Table des domaines
+CREATE TABLE domaines (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),  -- Identifiant unique du domaine
+    nom VARCHAR(100) UNIQUE NOT NULL               -- Nom du domaine (ex: Mathématiques, Informatique, etc.)
+);
+
+-- Table d'association entre professeurs et domaines (relation many-to-many)
+CREATE TABLE professeur_domaine (
+    professeur_id UUID NOT NULL,
+    domaine_id UUID NOT NULL,
+    PRIMARY KEY (professeur_id, domaine_id),
+    FOREIGN KEY (professeur_id) REFERENCES professeurs(id) ON DELETE CASCADE,
+    FOREIGN KEY (domaine_id) REFERENCES domaines(id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE filieres (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    nom VARCHAR(100) NOT NULL,
+    code VARCHAR(50) NOT NULL UNIQUE,
+    description TEXT,
+    departement_id UUID REFERENCES public.departements(id) ON DELETE CASCADE,
+    actif BOOLEAN DEFAULT TRUE, -- Champ pour activer ou désactiver la filière
+    date_creation TIMESTAMP DEFAULT NOW(),
+    date_mise_a_jour TIMESTAMP DEFAULT NOW()
+);
+
+
+CREATE TABLE niveaux (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    nom VARCHAR(50),
+    description TEXT,
+    filiere_id UUID REFERENCES filieres(id) ON DELETE CASCADE
+);
+
+-- Spécialités
+CREATE TABLE specialites (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    nom VARCHAR(100),
+    description TEXT,
+    niveau_id UUID REFERENCES niveaux(id) ON DELETE CASCADE
+);
