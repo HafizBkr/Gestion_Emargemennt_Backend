@@ -78,3 +78,41 @@ CREATE TABLE specialites (
     description TEXT,
     niveau_id UUID REFERENCES niveaux(id) ON DELETE CASCADE
 );
+
+CREATE TABLE programmes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    specialite_id UUID NOT NULL,
+    matiere VARCHAR(255) NOT NULL,
+    code_matiere VARCHAR(50) UNIQUE NOT NULL,
+    nombre_credits INT CHECK (nombre_credits > 0),
+    volume_horaire INT CHECK (volume_horaire > 0),
+    actif BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (specialite_id) REFERENCES specialites(id) ON DELETE CASCADE
+);
+
+
+CREATE OR REPLACE FUNCTION update_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_programmes_timestamp
+BEFORE UPDATE ON programmes
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();
+
+
+CREATE TABLE salles (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    nom VARCHAR(100) NOT NULL UNIQUE,
+    capacite INT CHECK (capacite > 0),
+    equipements TEXT, -- Liste des équipements sous forme de texte (ex: "projecteur, tableau, climatisation")
+    disponible BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

@@ -8,6 +8,7 @@ const domaineRoutes=require('./routes/domain.routes');
 const fillieresRoutes=require('./routes/fillieres.routes');
 const niveauRoutes=require('./routes/niveau.routes');
 const specialiteRoutes=require('./routes/specialite.routres');
+const programeRoutes=require('./routes/programes.routes')
 
 const client = require('./config/database'); 
 const pool = require('./config/database');
@@ -21,6 +22,7 @@ app.use('/admin/dep',departemnentRoutes);
 app.use('/admin/fillieres', fillieresRoutes);
 app.use('/admin/niveau', niveauRoutes);
 app.use('/admin/specialite', specialiteRoutes);
+app.use('/admin/programes', programeRoutes);
 
 app.get('/test-db', async (req, res) => {
     try {
