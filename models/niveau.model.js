@@ -29,6 +29,24 @@ class NiveauModel {
         return result.rows[0];
     }
 
+    async GetNiveauById(niveauId) {
+        try {
+            // Effectuer une requête SQL pour récupérer le niveau basé sur l'ID
+            const result = await pool.oneOrNone('SELECT * FROM niveaux WHERE id = $1', [niveauId]);
+    
+            // Si aucun niveau n'est trouvé, renvoyer null
+            if (!result) {
+                throw new Error('Niveau non trouvé');
+            }
+    
+            // Retourner l'objet niveau
+            return result;
+        } catch (error) {
+            console.error('Erreur lors de la récupération du niveau :', error);
+            throw new Error('Erreur lors de la récupération du niveau');
+        }
+    }
+
     // Mettre à jour un niveau
     async updateNiveau(id, updateData) {
         const { nom, description, filiere_id } = updateData;

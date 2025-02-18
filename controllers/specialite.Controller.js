@@ -1,3 +1,4 @@
+const specialiteModel = require('../models/specialite.model');
 const SpecialiteModel = require('../models/specialite.model');
 
 class SpecialiteController {
@@ -74,6 +75,25 @@ class SpecialiteController {
             res.status(500).json({ message: error.message });
         }
     }
+
+        async getProgrammesByNiveau(req, res) {
+            const { niveauId } = req.params;
+    
+            try {
+                const programmes = await specialiteModel.getProgrammesByNiveau(niveauId);
+    
+                if (programmes.message) {
+                    return res.status(404).json({ message: programmes.message });
+                }
+    
+                return res.status(200).json(programmes);
+            } catch (error) {
+                console.error(error);
+                return res.status(500).json({ message: "Erreur interne du serveur." });
+            }
+        }
+    
+    
 }
 
 module.exports = new SpecialiteController();

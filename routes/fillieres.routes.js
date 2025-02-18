@@ -6,7 +6,7 @@ const authenticateAdmin = require('../middlewares/adminMiddleware');
 
 router.post('/', authenticateAdmin('admin'), filiereController.createFiliere);
 router.put('/:id', authenticateAdmin('admin'), filiereController.updateFiliere);
-router.get('/:id', authenticateAdmin('admin'), filiereController.getFiliereById);
+router.get('/:id', filiereController.getFiliereById);
 router.patch('/:id/deactivate', authenticateAdmin('admin'), filiereController.deactivateFiliere);
 router.get('/', filiereController.getAllFilieres);
 

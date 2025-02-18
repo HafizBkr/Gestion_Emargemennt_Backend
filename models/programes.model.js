@@ -91,6 +91,37 @@ class ProgrammeModel {
         }
     }
     
+    async  getNiveauByProgrammeId(programmeId) {
+        try {
+            // Verify programme ID is provided
+            if (!programmeId) {
+                throw new Error('Programme ID is required');
+            }
+    
+            // SQL query to join the necessary tables
+            const query = `
+                SELECT n.*
+                FROM programmes p
+                JOIN specialites s ON p.specialite_id = s.id
+                JOIN niveaux n ON s.niveau_id = n.id
+                WHERE p.id = $1
+            `;
+    
+            // Execute the query
+            const result = await pool.query(query, [programmeId]);
+    
+            // Check if any result was found
+            if (result.rows.length === 0) {
+                return null;
+            }
+    
+            // Return the niveau information
+            return result.rows[0];
+        } catch (error) {
+            console.error('Error in getNiveauByProgrammeId:', error);
+            throw new Error(`Failed to get niveau: ${error.message}`);
+        }
+    }
     
 }
 

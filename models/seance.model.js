@@ -122,6 +122,110 @@ static async findSeance({ programme_id, salle_id, professeur_id, date, heure_deb
     }
 }
 
+static async getAllSeances() {
+    const query = `
+        SELECT 
+            s.*,
+            p.matiere as programme_matiere,
+            p.code_matiere,
+            spec.nom as specialite_nom,
+            n.nom as niveau_nom,
+            n.description as niveau_description,
+            f.nom as filiere_nom,
+            pr.nom as professeur_nom,
+            pr.email as professeur_email,
+            sal.nom as salle_nom,
+            sal.capacite as salle_capacite
+        FROM seances s
+        LEFT JOIN programmes p ON s.programme_id = p.id
+        LEFT JOIN specialites spec ON p.specialite_id = spec.id
+        LEFT JOIN niveaux n ON spec.niveau_id = n.id
+        LEFT JOIN filieres f ON n.filiere_id = f.id
+        LEFT JOIN professeurs pr ON s.professeur_id = pr.id
+        LEFT JOIN salles sal ON s.salle_id = sal.id
+        ORDER BY s.date DESC, s.heure_debut ASC;
+    `;
+
+    try {
+        const { rows } = await pool.query(query);
+        return rows;
+    } catch (error) {
+        console.error('Erreur dans getAllSeances:', error);
+        throw error;
+    }
+}
+
+// Fonction pour obtenir une séance par ID avec informations complètes
+static async getSeanceById(id) {
+    const query = `
+        SELECT 
+            s.*,
+            p.matiere as programme_matiere,
+            p.code_matiere,
+            spec.nom as specialite_nom,
+            spec.description as specialite_description,
+            n.nom as niveau_nom,
+            n.description as niveau_description,
+            f.nom as filiere_nom,
+            f.description as filiere_description,
+            pr.nom as professeur_nom,
+            pr.email as professeur_email,
+            pr.telephone as professeur_telephone,
+            sal.nom as salle_nom,
+            sal.capacite as salle_capacite,
+            sal.description as salle_description
+        FROM seances s
+        LEFT JOIN programmes p ON s.programme_id = p.id
+        LEFT JOIN specialites spec ON p.specialite_id = spec.id
+        LEFT JOIN niveaux n ON spec.niveau_id = n.id
+        LEFT JOIN filieres f ON n.filiere_id = f.id
+        LEFT JOIN professeurs pr ON s.professeur_id = pr.id
+        LEFT JOIN salles sal ON s.salle_id = sal.id
+        WHERE s.id = $1;
+    `;
+
+    try {
+        const { rows } = await pool.query(query, [id]);
+        return rows[0] || null;
+    } catch (error) {
+        console.error('Erreur dans getSeanceById:', error);
+        throw error;
+    }
+}
+
+// Fonction pour obtenir les séances d'un niveau spécifique
+static async getSeancesByNiveau(niveauId) {
+    const query = `
+        SELECT 
+            s.*,
+            p.matiere as programme_matiere,
+            spec.nom as specialite_nom,
+            n.nom as niveau_nom,
+            f.nom as filiere_nom,
+            pr.nom as professeur_nom,
+            sal.nom as salle_nom
+        FROM seances s
+        JOIN programmes p ON s.programme_id = p.id
+        JOIN specialites spec ON p.specialite_id = spec.id
+        JOIN niveaux n ON spec.niveau_id = n.id
+        JOIN filieres f ON n.filiere_id = f.id
+        JOIN professeurs pr ON s.professeur_id = pr.id
+        JOIN salles sal ON s.salle_id = sal.id
+        WHERE n.id = $1
+        ORDER BY s.date DESC, s.heure_debut ASC;
+    `;
+
+    try {
+        const { rows } = await pool.query(query, [niveauId]);
+        return rows;
+    } catch (error) {
+        console.error('Erreur dans getSeancesByNiveau:', error);
+        throw error;
+    }
+}
+
+
+
 }
 
 module.exports = SeanceModel;

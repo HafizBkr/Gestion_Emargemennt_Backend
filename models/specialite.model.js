@@ -115,6 +115,42 @@ async getSpecialitesByFiliere(filiereId) {
     return result.rows;
 }
 
+// Récupérer les programmes par niveau
+async getProgrammesByNiveau(niveauId) {
+    // 1. Récupérer toutes les spécialités associées au niveau
+    const specialitesResult = await pool.query(
+        `SELECT s.*, f.nom AS filiere_nom
+         FROM specialites s
+         JOIN niveaux n ON s.niveau_id = n.id
+         JOIN filieres f ON n.filiere_id = f.id
+         WHERE n.id = $1;`, 
+        [niveauId]
+    );
+    
+    if (specialitesResult.rows.length === 0) {
+        return { message: "Aucune spécialité trouvée pour ce niveau" };
+    }
+
+    // 2. Pour chaque spécialité, récupérer les programmes associés
+    const programmes = [];
+
+    for (let specialite of specialitesResult.rows) {
+        const programmesResult = await pool.query(
+            `SELECT p.*, a.start_date AS annee_scolaire_start, a.end_date AS annee_scolaire_end
+             FROM programmes p
+             JOIN annees_scolaires a ON p.annee_scolaire_id = a.id
+             WHERE p.specialite_id = $1;`, 
+            [specialite.id]
+        );
+
+        specialite.programmes = programmesResult.rows;
+        programmes.push(specialite);
+    }
+
+    return programmes;
+}
+
+
 }
 
 module.exports = new SpecialiteModel();

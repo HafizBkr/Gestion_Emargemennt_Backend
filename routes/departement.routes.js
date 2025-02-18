@@ -4,8 +4,8 @@ const departementController = require("../controllers/departement.Controller");
 const authenticateAdmin = require('../middlewares/adminMiddleware');
 
 router.post("/", authenticateAdmin('admin'), departementController.createDepartement);
-router.get("/", authenticateAdmin('admin'), departementController.getAllDepartements);
-router.get("/:id", authenticateAdmin('admin'), departementController.getDepartementById);
+router.get("/", departementController.getAllDepartements);
+router.get("/:id", departementController.getDepartementById);
 router.put("/:id", authenticateAdmin('admin'), departementController.updateDepartement);
 router.delete("/:id", authenticateAdmin('admin'), departementController.deleteDepartement);
 router.patch("/:id/toggle", authenticateAdmin('admin'), departementController.toggleDepartement);

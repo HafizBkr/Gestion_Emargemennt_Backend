@@ -17,14 +17,28 @@ class SeanceController {
         }
     }
 
-    // ➜ Obtenir une séance par ID
+    // Obtenir une séance par ID
     static async getSeanceById(req, res) {
         try {
             const seance = await SeanceModel.getSeanceById(req.params.id);
-            if (!seance) return res.status(404).json({ error: "Séance non trouvée" });
+            if (!seance) {
+                return res.status(404).json({ error: "Séance non trouvée" });
+            }
             return res.json(seance);
         } catch (error) {
             console.error("Erreur lors de la récupération de la séance:", error);
+            return res.status(500).json({ error: `Erreur interne du serveur: ${error.message}` });
+        }
+    }
+
+    // Obtenir les séances d'un niveau
+    static async getSeancesByNiveau(req, res) {
+        try {
+            const { niveauId } = req.params;
+            const seances = await SeanceModel.getSeancesByNiveau(niveauId);
+            return res.json(seances);
+        } catch (error) {
+            console.error("Erreur lors de la récupération des séances du niveau:", error);
             return res.status(500).json({ error: `Erreur interne du serveur: ${error.message}` });
         }
     }
@@ -62,20 +76,27 @@ static async createSeance(req, res) {
             return res.status(404).json({ error: "Programme non trouvé" });
         }
 
-        // 4. Récupérer les informations de la salle
+        // 4. Récupérer les informations du niveau
+        const niveau = await ProgrammeModel.getNiveauByProgrammeId(programme_id);
+        if (!niveau) {
+            return res.status(404).json({ error: "Niveau non trouvé pour ce programme" });
+        }
+
+        // 5. Récupérer les informations de la salle
         const salle = await SalleModel.getSalleById(salle_id);
         if (!salle) {
             return res.status(404).json({ error: "Salle non trouvée" });
         }
 
-        // 5. Créer la séance
+        // 6. Créer la séance
         const seance = await SeanceModel.createSeance({
             programme_id,
             programme_nom: programme.course_name,
             programme_filiere: programme.filiere,
             programme_specialite: programme.specialite,
+            programme_niveau: niveau.nom, // Ajout du niveau
             salle_id,
-            salle_nom: salle.nom,  // Utilisation de salle.nom après récupération
+            salle_nom: salle.nom,
             professeur_id,
             date,
             heure_debut,
@@ -83,19 +104,20 @@ static async createSeance(req, res) {
             statut
         });
 
-        // 6. Envoyer un rappel via WhatsApp
+        // 7. Envoyer un rappel via WhatsApp
         await sendProfessorReminder(
-            professeur.telephone,  // Professeur téléphone
-            date,                   // Date
-            heure_debut,            // Heure de début
-            heure_fin,              // Heure de fin
-            programme               // Passer l'objet programme complet
+            professeur.telephone,
+            date,
+            heure_debut,
+            heure_fin,
+            programme,
+            niveau // Ajout du niveau comme paramètre
         );
 
-        // 7. Structurer et envoyer un email de confirmation
+        // 8. Structurer et envoyer un email de confirmation
         const emailSubject = `Nouvelle séance créée : ${programme.course_name} - ${programme.filiere}`;
         const emailText = `
-            Bonjour  ${professeur.nom},
+            Bonjour ${professeur.nom},
 
             Une nouvelle séance a été ajoutée à votre emploi du temps pour le programme ${programme.course_name} dans la filière ${programme.filiere}.
 
@@ -104,6 +126,7 @@ static async createSeance(req, res) {
             Programme : ${programme.course_name}
             Filière : ${programme.filiere}
             Spécialité : ${programme.specialite}
+            Niveau : ${niveau.nom}
             Salle : ${salle.nom}
             Date : ${date}
             Heure de début : ${heure_debut}
