@@ -59,6 +59,39 @@ class ProgrammeModel {
         );
         return result.rows[0];
     }
+
+    async getProgrammeById(id) {
+        try {
+            const result = await pool.query(`
+                SELECT 
+                    p.id, 
+                    p.matiere AS course_name, 
+                    p.code_matiere,
+                    p.nombre_credits, 
+                    p.volume_horaire, 
+                    p.actif,
+                    s.nom AS specialite, 
+                    f.nom AS filiere
+                FROM programmes p
+                JOIN specialites s ON p.specialite_id = s.id
+                JOIN niveaux n ON s.niveau_id = n.id
+                JOIN filieres f ON n.filiere_id = f.id
+                WHERE p.id = $1
+            `, [id]);
+            
+            // Vérification que le résultat est non vide
+            if (result.rows.length > 0) {
+                return result.rows[0];  // Le programme a été trouvé
+            } else {
+                return null;  // Aucun programme trouvé
+            }
+        } catch (error) {
+            console.error(`Erreur lors de la récupération du programme avec l'ID ${id}:`, error);
+            throw error;
+        }
+    }
+    
+    
 }
 
 module.exports = new ProgrammeModel();

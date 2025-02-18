@@ -46,6 +46,16 @@ class SalleModel {
         );
         return result.rows[0];
     }
+    static async getSalleById(id) {
+        try {
+            const result = await pool.query("SELECT * FROM salle WHERE id = $1", [id]);
+            return result.rows[0] || null;
+        } catch (error) {
+            console.error("Erreur lors de la récupération de la salle:", error);
+            throw error;
+        }
+    }
+    
 }
 
 module.exports = new SalleModel();

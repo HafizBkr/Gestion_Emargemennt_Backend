@@ -9,26 +9,43 @@ const client = twilio(
 );
 
 // Fonction pour envoyer un rappel à un professeur via WhatsApp
-const sendProfessorReminder = async (professorPhone, date, time) => {
+const sendProfessorReminder = async (professorPhone, date, heure_debut, heure_fin, programme) => {
   try {
-    if (!professorPhone || !date || !time) {
-      throw new Error('Tous les paramètres (professorPhone, date, time) doivent être fournis.');
+    // Vérification que toutes les données nécessaires sont présentes
+    const { course_name, filiere, specialite } = programme;
+
+    if (!professorPhone || !date || !heure_debut || !heure_fin || !course_name || !filiere || !specialite) {
+      throw new Error('Tous les paramètres (professorPhone, date, heure_debut, heure_fin, course_name, filiere, specialite) doivent être fournis.');
     }
 
-    const message = `Votre rendez-vous est prévu le ${date} à ${time}. Si vous devez le modifier, veuillez répondre et nous faire savoir.`;
+    // Construction du message
+    const message = `
+      📢 Rappel de cours :
+      - 📖 Cours : ${course_name}
+      - 🎓 Filière : ${filiere}
+      - 🏛️ Spécialité : ${specialite}
+      - 📅 Date : ${date}
+      - ⏰ Heure de début : ${heure_debut}
+      - ⏰ Heure de fin : ${heure_fin}
+      
+      Merci de bien vouloir être présent à l'heure prévue.
+      En cas de modification, veuillez nous en informer.  
+      
+      📌 L'administration.
+    `;
 
-    // Envoi du message via l'API Twilio
+    // Envoi du message via Twilio
     const response = await client.messages.create({
       body: message,
-      from: 'whatsapp:+14155238886',  // Numéro WhatsApp Twilio (à ajuster si nécessaire)
-      to: `whatsapp:${professorPhone}` // Numéro du professeur passé en paramètre
+      from: 'whatsapp:+14155238886',  // Numéro Twilio
+      to: `whatsapp:${professorPhone}` // Numéro du professeur
     });
 
     console.log('Rappel envoyé avec succès:', response.sid);
     return response;
   } catch (error) {
-    console.error('Erreur lors de l\'envoi du rappel:', error);
-    throw error;
+    console.error('Erreur lors de l\'envoi du rappel:', error.message); // Utilisation de message pour afficher l'erreur
+    throw new Error('Erreur lors de l\'envoi du rappel: ' + error.message);
   }
 };
 

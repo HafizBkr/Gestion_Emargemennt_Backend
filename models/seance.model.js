@@ -99,7 +99,29 @@ class SeanceModel {
         return result.rows[0];
     }
 
-   
+   // models/SeanceModel.js
+
+static async findSeance({ programme_id, salle_id, professeur_id, date, heure_debut, heure_fin }) {
+    const query = `
+        SELECT * FROM seances 
+        WHERE programme_id = $1 
+        AND salle_id = $2 
+        AND professeur_id = $3 
+        AND date = $4 
+        AND heure_debut = $5 
+        AND heure_fin = $6
+    `;
+    const values = [programme_id, salle_id, professeur_id, date, heure_debut, heure_fin];
+
+    try {
+        const result = await pool.query(query, values);
+        return result.rows[0];  // Si une séance existe déjà, retourner la première ligne
+    } catch (error) {
+        console.error("Erreur lors de la recherche de séance:", error);
+        throw error;
+    }
+}
+
 }
 
 module.exports = SeanceModel;
