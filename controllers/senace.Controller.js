@@ -198,6 +198,21 @@ static async createSeance(req, res) {
             return res.status(500).json({ error: `Erreur interne du serveur: ${error.message}` });
         }
     }
+    static async getSeancesByProfesseur(req, res) {
+        try {
+            const professeurId = req.professeur.id; // Récupérer l'ID du professeur depuis le token JWT
+
+            if (!professeurId) {
+                return res.status(400).json({ error: "ID du professeur manquant" });
+            }
+
+            const seances = await SeanceModel.getSeancesByProfesseur(professeurId);
+            return res.json(seances);
+        } catch (error) {
+            console.error("Erreur lors de la récupération des séances:", error);
+            return res.status(500).json({ error: `Erreur interne du serveur: ${error.message}` });
+        }
+    }
 }
 
 module.exports = SeanceController;
