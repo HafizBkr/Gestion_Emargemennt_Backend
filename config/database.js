@@ -10,7 +10,7 @@ const dbConfig = {
     port: process.env.DB_PORT,
     database: process.env.DB_NAME,   // Utilise ici DB_NAME au lieu de DB_DATABASE
 };
-console.log('Connexion à PostgreSQL avec mot de passe:', process.env.DB_PASSWORD);
+
 
 // Création d'une nouvelle instance de Pool pour PostgreSQL
 const pool = new Pool(dbConfig);
