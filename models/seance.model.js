@@ -32,37 +32,42 @@ class SeanceModel {
 
     static async getSeanceById(id) {
         const query = `
-            SELECT 
-                s.id, 
-                s.date, 
-                s.heure_debut, 
-                s.heure_fin,
-                to_char(s.date, 'Day') AS jour_semaine,
-                s.statut,
-                p.nom AS programme_nom, 
-                p.specialite AS programme_specialite,
-                pr.nom AS professeur_nom,
-                pr.email AS professeur_email,
-                sa.nom AS salle_nom, 
-                sa.capacite AS salle_capacite, 
-                sa.equipements AS salle_equipements
-            FROM seances s
-            JOIN programmes p ON s.programme_id = p.id
-            JOIN professeurs pr ON s.professeur_id = pr.id
-            JOIN salles sa ON s.salle_id = sa.id
-            WHERE s.id = $1;
+                    SELECT 
+            s.id AS seance_id,
+            s.date AS seance_date,
+            s.heure_debut,
+            s.heure_fin,
+            s.statut,
+            s.est_en_cours,
+            p.id AS programme_id,
+            p.matiere AS programme_matiere,
+            pr.id AS professeur_id,
+            pr.nom AS professeur_nom,
+            pr.prenom AS professeur_prenom,
+            sa.id AS salle_id,
+            sa.nom AS salle_nom,
+            sa.capacite AS salle_capacite,
+            sa.equipements AS salle_equipements
+        FROM seances s
+        JOIN programmes p ON s.programme_id = p.id
+        JOIN professeurs pr ON s.professeur_id = pr.id
+        JOIN salles sa ON s.salle_id = sa.id
+        WHERE s.id = $1;
+
         `;
+
         const result = await pool.query(query, [id]);
-        return result.rows[0];
+        return result.rows[0] || null; // Retourne null si aucune séance trouvée
     }
 
-    static async createSeance({ date, heure_debut, heure_fin, programme_id, professeur_id, salle_id }) {
+
+    static async createSeance({ date, heure_debut, heure_fin, programme_id, professeur_id, salle_id,statut }) {
         const query = `
             INSERT INTO seances (date, heure_debut, heure_fin, programme_id, professeur_id, salle_id, statut)
-            VALUES ($1, $2, $3, $4, $5, $6, 'en cours')
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING id, professeur_id;  -- Retourner aussi le professeur_id pour récupérer l'email
         `;
-        const result = await pool.query(query, [date, heure_debut, heure_fin, programme_id, professeur_id, salle_id]);
+        const result = await pool.query(query, [date, heure_debut, heure_fin, programme_id, professeur_id, salle_id,statut]);
         
         // Récupérer l'email du professeur en utilisant son ID
         const professeurQuery = `
@@ -172,8 +177,7 @@ static async getSeanceById(id) {
             pr.email as professeur_email,
             pr.telephone as professeur_telephone,
             sal.nom as salle_nom,
-            sal.capacite as salle_capacite,
-            sal.description as salle_description
+            sal.capacite as salle_capacite
         FROM seances s
         LEFT JOIN programmes p ON s.programme_id = p.id
         LEFT JOIN specialites spec ON p.specialite_id = spec.id
@@ -222,6 +226,36 @@ static async getSeancesByNiveau(niveauId) {
         console.error('Erreur dans getSeancesByNiveau:', error);
         throw error;
     }
+}
+
+
+static async getSeancesByProfesseur(professeurId) {
+    const query = `
+        SELECT 
+            s.id, 
+            s.date, 
+            s.heure_debut, 
+            s.heure_fin,
+            to_char(s.date, 'Day') AS jour_semaine,
+            s.statut, 
+            p.matiere AS programme_nom,   
+            sp.nom AS programme_specialite,  
+            pr.nom AS professeur_nom,
+            pr.email AS professeur_email,
+            sa.nom AS salle_nom, 
+            sa.capacite AS salle_capacite, 
+            sa.equipements AS salle_equipements
+        FROM seances s
+        JOIN programmes p ON s.programme_id = p.id
+        JOIN specialites sp ON p.specialite_id = sp.id  
+        JOIN professeurs pr ON s.professeur_id = pr.id
+        JOIN salles sa ON s.salle_id = sa.id
+        WHERE s.professeur_id = $1
+        ORDER BY s.date DESC;
+    `;
+
+    const result = await pool.query(query, [professeurId]);
+    return result.rows;
 }
 
 

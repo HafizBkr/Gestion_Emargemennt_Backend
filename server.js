@@ -1,7 +1,6 @@
 const app = require('./app');
-const port = process.env.PORT || 10000; 
+const port = process.env.PORT || 3000; 
 
-
-app.listen(port, '0.0.0.0', () => {  // Se lier à 0.0.0.0 pour accepter les connexions externes
+app.listen(port, () => {
     console.log(`Serveur lancé sur le port ${port}`);
-  });
+});
