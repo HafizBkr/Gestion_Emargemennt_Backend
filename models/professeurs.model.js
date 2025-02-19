@@ -82,32 +82,34 @@ async getAllProfesseurs() {
         return result.rows[0];
     }
 
+    
     async changePassword(id, ancien_mot_de_passe, nouveau_mot_de_passe) {
-        // Récupérer le professeur par ID
-        const professeur = await this.getProfesseurById(id);
-        if (!professeur) {
-            throw new Error("Professeur non trouvé.");
+        if (!ancien_mot_de_passe || !nouveau_mot_de_passe) {
+            throw new Error("Les champs 'ancien_mot_de_passe' et 'nouveau_mot_de_passe' sont requis.");
         }
-
-        // Vérifier si l'ancien mot de passe est correct
-        const isMatch = await bcrypt.compare(ancien_mot_de_passe.trim(), professeur.mot_de_passe.trim());
-        if (!isMatch) {
+    
+        const professeur = await pool.query("SELECT mot_de_passe FROM professeurs WHERE id = $1", [id]);
+    
+        if (!professeur.rows.length) {
+            throw new Error("Professeur introuvable.");
+        }
+    
+        const mot_de_passe_hash = professeur.rows[0].mot_de_passe;
+        if (!mot_de_passe_hash) {
+            throw new Error("Erreur: mot de passe non défini en base.");
+        }
+    
+        const match = await bcrypt.compare(ancien_mot_de_passe, mot_de_passe_hash);
+        if (!match) {
             throw new Error("Ancien mot de passe incorrect.");
         }
-
-        // Hacher le nouveau mot de passe
-        const hashedPassword = await bcrypt.hash(nouveau_mot_de_passe.trim(), 10);
-
-        // Mettre à jour le mot de passe et définir mot_de_passe_change à TRUE
-        const result = await pool.query(
-            `UPDATE professeurs
-            SET mot_de_passe = $1, mot_de_passe_change = TRUE
-            WHERE id = $2 RETURNING *;`,
-            [hashedPassword, id]
-        );
-
-        return result.rows[0];
+    
+        const nouveauHash = await bcrypt.hash(nouveau_mot_de_passe, 10);
+        await pool.query("UPDATE professeurs SET mot_de_passe = $1, date_mise_a_jour = NOW() WHERE id = $2", [nouveauHash, id]);
+    
+        return { message: "Mot de passe mis à jour avec succès." };
     }
+    
 
     // Mettre à jour la date de dernière connexion
     async updateLastLogin(id) {
@@ -182,15 +184,6 @@ async getAllProfesseurs() {
         }
     
         // Récupérer les domaines associés à un professeur
-async getDomainesProfesseur(professeur_id) {
-    const result = await pool.query(
-        `SELECT d.* FROM domaines d
-         JOIN professeurs_domaines pd ON d.id = pd.domaine_id
-         WHERE pd.professeur_id = $1;`,
-        [professeur_id]
-    );
-    return result.rows;
-}
   // Récupérer les professeurs associés à un domaine
 async getProfesseursByDomaine(domaine_id) {
     const result = await pool.query(

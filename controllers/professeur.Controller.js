@@ -150,17 +150,29 @@ async getProfesseurById(req, res) {
     }
     
 
+ 
     async changePassword(req, res) {
-        const { id } = req.params; // ID du professeur
-        const { ancien_mot_de_passe, nouveau_mot_de_passe } = req.body;
-
         try {
+            const { ancien_mot_de_passe, nouveau_mot_de_passe } = req.body;
+            const { id } = req.params; // Si l'ID est dans l'URL
+    
+            if (!id) {
+                return res.status(400).json({ error: "ID du professeur manquant." });
+            }
+    
+            if (!ancien_mot_de_passe || !nouveau_mot_de_passe) {
+                return res.status(400).json({ error: "Tous les champs sont obligatoires." });
+            }
+    
             const professeur = await professeurModel.changePassword(id, ancien_mot_de_passe, nouveau_mot_de_passe);
-            res.status(200).json({ message: "Mot de passe changé avec succès.", professeur });
+            res.status(200).json({ message: "Mot de passe mis à jour avec succès.", professeur });
         } catch (error) {
             res.status(400).json({ error: error.message });
         }
     }
+    
+    
+
 
         // Activer ou désactiver un professeur
         async toggleActivationProfesseur(req, res) {
