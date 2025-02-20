@@ -30,36 +30,6 @@ class SeanceModel {
     
     
 
-    static async getSeanceById(id) {
-        const query = `
-                    SELECT 
-            s.id AS seance_id,
-            s.date AS seance_date,
-            s.heure_debut,
-            s.heure_fin,
-            s.statut,
-            s.est_en_cours,
-            p.id AS programme_id,
-            p.matiere AS programme_matiere,
-            pr.id AS professeur_id,
-            pr.nom AS professeur_nom,
-            pr.prenom AS professeur_prenom,
-            sa.id AS salle_id,
-            sa.nom AS salle_nom,
-            sa.capacite AS salle_capacite,
-            sa.equipements AS salle_equipements
-        FROM seances s
-        JOIN programmes p ON s.programme_id = p.id
-        JOIN professeurs pr ON s.professeur_id = pr.id
-        JOIN salles sa ON s.salle_id = sa.id
-        WHERE s.id = $1;
-
-        `;
-
-        const result = await pool.query(query, [id]);
-        return result.rows[0] || null; // Retourne null si aucune séance trouvée
-    }
-
 
     static async createSeance({ date, heure_debut, heure_fin, programme_id, professeur_id, salle_id,statut }) {
         const query = `
@@ -257,6 +227,7 @@ static async getSeancesByProfesseur(professeurId) {
     const result = await pool.query(query, [professeurId]);
     return result.rows;
 }
+
 
 
 
