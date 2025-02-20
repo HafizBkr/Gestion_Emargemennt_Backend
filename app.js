@@ -12,6 +12,7 @@ const programeRoutes=require('./routes/programes.routes')
 const sallesRoutes=require('./routes/salles.routes')
 const anneeRoutes=require('./routes/anees.routes')
 const seanceRoutes=require('./routes/seance.routes');
+const emargementsRoutes = require("./routes/emmargement.routes");
 
 const pool = require('./config/database');
 
@@ -28,6 +29,8 @@ app.use('/admin/programes', programeRoutes);
 app.use('/admin/salles', sallesRoutes);
 app.use('/admin/annee', anneeRoutes);
 app.use('/admin/seance', seanceRoutes);
+app.use("/api/emargements", emargementsRoutes);
+
 
 app.get('/test-db', async (req, res) => {
     try {

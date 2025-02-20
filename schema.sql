@@ -171,3 +171,40 @@ CREATE TRIGGER update_seances_timestamp
 BEFORE UPDATE ON seances
 FOR EACH ROW
 EXECUTE FUNCTION update_timestamp();
+
+-- Table emargements avec un ID UUID et un trigger pour gérer l'émargement
+CREATE TABLE emargements (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    seance_id UUID NOT NULL,
+    professeur_id UUID NOT NULL,
+    heure_debut TIMESTAMP NOT NULL,
+    heure_fin TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (seance_id) REFERENCES seances(id) ON DELETE CASCADE,
+    FOREIGN KEY (professeur_id) REFERENCES professeurs(id) ON DELETE CASCADE
+);
+
+-- Trigger pour changer le statut de la séance à 'effectuée' après l'émargement
+CREATE OR REPLACE FUNCTION update_seance_status()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Vérification : Un professeur ne peut émarger qu'une seule fois pour une séance
+    IF (SELECT COUNT(*) FROM emargements WHERE seance_id = NEW.seance_id) > 0 THEN
+        RAISE EXCEPTION 'Un professeur ne peut émarger qu''une seule fois pour une séance';
+    END IF;
+
+    -- Mise à jour du statut de la séance en 'effectuée' après un émargement
+    UPDATE seances 
+    SET statut = 'effectuée'
+    WHERE id = NEW.seance_id;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Création du trigger pour appeler la fonction après un émargement
+CREATE TRIGGER trg_update_seance_status
+AFTER INSERT ON emargements
+FOR EACH ROW
+EXECUTE FUNCTION update_seance_status();
