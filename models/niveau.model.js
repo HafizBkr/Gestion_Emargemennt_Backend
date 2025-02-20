@@ -76,6 +76,16 @@ class NiveauModel {
       );
       return result.rows;
   }
+
+  async getAllNiveauxWithFiliere() {
+    const result = await pool.query(`
+        SELECT niveaux.id, niveaux.nom AS niveau_nom, niveaux.description, filieres.id AS filiere_id, filieres.nom AS filiere_nom
+        FROM niveaux
+        INNER JOIN filieres ON niveaux.filiere_id = filieres.id
+        ORDER BY filieres.nom, niveaux.nom;
+    `);
+    return result.rows;
+}
 }
 
 module.exports = new NiveauModel();

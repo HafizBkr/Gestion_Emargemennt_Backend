@@ -68,6 +68,45 @@ class NiveauController {
             res.status(500).json({ message: error.message });
         }
     }
+
+    async getAllNiveauxGroupedByFiliere(req, res) {
+        try {
+            const niveaux = await NiveauModel.getAllNiveauxWithFiliere();
+
+            // Grouper les niveaux par filière
+            const groupedByFiliere = niveaux.reduce((acc, niveau) => {
+                const filiereNom = niveau.filiere_nom;
+
+                // Si la filière n'existe pas encore dans l'objet, l'ajouter
+                if (!acc[filiereNom]) {
+                    acc[filiereNom] = {
+                        filiere_id: niveau.filiere_id,
+                        niveaux: []
+                    };
+                }
+
+                // Ajouter le niveau à la filière correspondante
+                acc[filiereNom].niveaux.push({
+                    id: niveau.id,
+                    nom: niveau.niveau_nom,
+                    description: niveau.description
+                });
+
+                return acc;
+            }, {});
+
+            return res.status(200).json({
+                success: true,
+                data: groupedByFiliere
+            });
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                message: "Une erreur est survenue.",
+                error: error.message
+            });
+        }
+    }
 }
 
 module.exports = new NiveauController();
