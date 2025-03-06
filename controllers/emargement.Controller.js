@@ -2,14 +2,14 @@ const EmargementModel = require("../models/emargement.model");
 
 class EmargementController {
     // ➜ Ajouter un émargement
-    static async ajouterEmargement(req, res) {
+    static async ajouterEmargementDebut(req, res) {
         try {
             const { seance_id } = req.params;
             const { id: professeur_id, role } = req.professeur; // Récupère l'ID et rôle du professeur à partir du token
 
             // Si l'utilisateur est un admin, il peut émarger sans restriction
             if (role === "admin") {
-                const emargement = await EmargementModel.ajouterEmargement(seance_id, professeur_id);
+                const emargement = await EmargementModel.ajouterEmargementDebut(seance_id, professeur_id);
                 return res.status(201).json({ message: "Émargement ajouté avec succès", emargement });
             }
 
@@ -20,7 +20,33 @@ class EmargementController {
             }
 
             // Ajouter l'émargement
-            const emargement = await EmargementModel.ajouterEmargement(seance_id, professeur_id);
+            const emargement = await EmargementModel.ajouterEmargementDebut(seance_id, professeur_id);
+            res.status(201).json({ message: "Émargement ajouté avec succès", emargement });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: error.message || "Erreur interne du serveur" });
+        }
+    }
+
+    static async ajouterEmargementFin(req, res) {
+        try {
+            const { seance_id } = req.params;
+            const { id: professeur_id, role } = req.professeur; // Récupère l'ID et rôle du professeur à partir du token
+
+            // Si l'utilisateur est un admin, il peut émarger sans restriction
+            if (role === "admin") {
+                const emargement = await EmargementModel.ajouterEmargementFin(seance_id, professeur_id);
+                return res.status(201).json({ message: "Émargement ajouté avec succès", emargement });
+            }
+
+            // Vérifier si le professeur est bien programmé sur cette séance
+            const estProgramme = await EmargementModel.verifierProfesseurSeance(seance_id, professeur_id);
+            if (!estProgramme) {
+                return res.status(403).json({ message: "Accès refusé : vous n'êtes pas programmé sur cette séance." });
+            }
+
+            // Ajouter l'émargement
+            const emargement = await EmargementModel.ajouterEmargementFin(seance_id, professeur_id);
             res.status(201).json({ message: "Émargement ajouté avec succès", emargement });
         } catch (error) {
             console.error(error);

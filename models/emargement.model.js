@@ -1,28 +1,59 @@
 const pool = require("../config/database");
 
 class EmargementModel {
-    // ➜ Ajouter un émargement après les vérifications nécessaires
-    static async ajouterEmargement(seanceId, professeurId) {
+    static async ajouterEmargementDebut(seanceId, professeurId) {
         try {
-            // Vérifier si le professeur a déjà émargé pour cette séance
-            const checkQuery = `SELECT COUNT(*) FROM emargements WHERE seance_id = $1 AND professeur_id = $2`;
+            // Vérifier si un émargement de début existe déjà pour ce professeur et cette séance
+            const checkQuery = `SELECT COUNT(*) FROM emargements WHERE seance_id = $1 AND professeur_id = $2 AND type_emargement = 'debut'`;
             const checkResult = await pool.query(checkQuery, [seanceId, professeurId]);
 
             if (parseInt(checkResult.rows[0].count) > 0) {
-                throw new Error("Un professeur ne peut émarger qu'une seule fois pour une séance.");
+                throw new Error("Un professeur ne peut émarger qu'une seule fois au début d'une séance.");
             }
-
-            // Récupérer les heures de début et de fin de la séance
+            
             const seanceQuery = `
                 SELECT heure_debut, heure_fin FROM seances WHERE id = $1
             `;
             const seanceResult = await pool.query(seanceQuery, [seanceId]);
             const { heure_debut, heure_fin } = seanceResult.rows[0];
 
-            // Insérer l'émargement
+            // Insérer l'émargement avec type 'debut'
             const insertQuery = `
-                INSERT INTO emargements (id, seance_id, professeur_id, heure_debut, heure_fin)
-                VALUES (gen_random_uuid(), $1, $2, $3, $4) 
+                INSERT INTO emargements (id, seance_id, professeur_id, heure_debut, heure_fin, type_emargement)
+                VALUES (gen_random_uuid(), $1, $2, $3, $4, 'debut') 
+                RETURNING *;
+            `;
+            const result = await pool.query(insertQuery, [seanceId, professeurId, heure_debut, heure_fin]);
+
+            // Mettre à jour le statut de la séance en "En Cours"
+            await pool.query(`UPDATE seances SET statut = 'En Cours' WHERE id = $1`, [seanceId]);
+
+            return result.rows[0]; // Retourne l'émargement ajouté
+        } catch (error) {
+            throw error;
+        }
+    }
+    
+    static async ajouterEmargementFin(seanceId, professeurId) {
+        try {
+            // Vérifier si un émargement de fin existe déjà pour ce professeur et cette séance
+            const checkQuery = `SELECT COUNT(*) FROM emargements WHERE seance_id = $1 AND professeur_id = $2 AND type_emargement = 'fin'`;
+            const checkResult = await pool.query(checkQuery, [seanceId, professeurId]);
+
+            if (parseInt(checkResult.rows[0].count) > 0) {
+                throw new Error("Un professeur ne peut émarger qu'une seule fois à la fin d'une séance.");
+            }
+            
+            const seanceQuery = `
+                SELECT heure_debut, heure_fin FROM seances WHERE id = $1
+            `;
+            const seanceResult = await pool.query(seanceQuery, [seanceId]);
+            const { heure_debut, heure_fin } = seanceResult.rows[0];
+
+            // Insérer l'émargement avec type 'fin'
+            const insertQuery = `
+                INSERT INTO emargements (id, seance_id, professeur_id, heure_debut, heure_fin, type_emargement)
+                VALUES (gen_random_uuid(), $1, $2, $3, $4, 'fin') 
                 RETURNING *;
             `;
             const result = await pool.query(insertQuery, [seanceId, professeurId, heure_debut, heure_fin]);
@@ -37,13 +68,13 @@ class EmargementModel {
     }
     
     // Dans le modèle EmargementModel
-static async getSeanceById(seanceId) {
-    const query = `
-        SELECT * FROM seances WHERE id = $1
-    `;
-    const result = await pool.query(query, [seanceId]);
-    return result.rows[0]; // Retourne la première ligne correspondant à l'id
-}
+    static async getSeanceById(seanceId) {
+        const query = `
+            SELECT * FROM seances WHERE id = $1
+        `;
+        const result = await pool.query(query, [seanceId]);
+        return result.rows[0]; // Retourne la première ligne correspondant à l'id
+    }
 
     // ➜ Vérifier si un professeur est programmé sur la séance
     static async verifierProfesseurSeance(seanceId, professeurId) {
@@ -55,8 +86,7 @@ static async getSeanceById(seanceId) {
         return parseInt(result.rows[0].count) > 0; // true si le professeur est programmé sur cette séance
     }
     
-
-    // ➜ Récupérer tous les émargements d’une séance
+    // ➜ Récupérer tous les émargements d'une séance
     static async getEmargementsBySeance(seance_id) {
         const query = "SELECT * FROM emargements WHERE seance_id = $1";
         const result = await pool.query(query, [seance_id]);
@@ -73,6 +103,7 @@ static async getSeanceById(seanceId) {
         const result = await pool.query(query, [seance_id]);
         return result.rows[0]?.total_heures || 0;
     }
+    
     static async checkVolumeHoraire(programmeId) {
         const query = `
             SELECT 

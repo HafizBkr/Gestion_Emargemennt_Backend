@@ -43,7 +43,6 @@ class SeanceController {
         }
     }
 
-  // controllers/seanceController.js
 
 // Fonction de création de séance
 static async createSeance(req, res) {
@@ -105,14 +104,21 @@ static async createSeance(req, res) {
         });
 
         // 7. Envoyer un rappel via WhatsApp
-        await sendProfessorReminder(
-            professeur.telephone,
-            date,
-            heure_debut,
-            heure_fin,
-            programme,
-            niveau // Ajout du niveau comme paramètre
-        );
+        try {
+            await sendProfessorReminder(
+                professeur.telephone,
+                date,
+                heure_debut,
+                heure_fin,
+                programme,
+                niveau
+            );
+            console.log("Message WhatsApp envoyé !");
+            console.log(professeur.telephone)
+        } catch (error) {
+            console.error("Erreur lors de l'envoi du message WhatsApp:", error);
+        }
+        
 
         // 8. Structurer et envoyer un email de confirmation
         const emailSubject = `Nouvelle séance créée : ${programme.course_name} - ${programme.filiere}`;

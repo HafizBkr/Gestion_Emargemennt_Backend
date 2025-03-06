@@ -5,8 +5,10 @@ const authenticateAdmin = require("../middlewares/adminMiddleware");
 
 const router = express.Router();
 
-// ➜ Seuls les professeurs concernés et les admins peuvent émarger
-router.post("/:seance_id", authMiddleware , EmargementController.ajouterEmargement);
+// Emmargement Debut 
+router.post("/Debut/:seance_id", authMiddleware , EmargementController.ajouterEmargementDebut);
+// Emmargement de fin
+router.post("/Fin/:seance_id", authMiddleware , EmargementController.ajouterEmargementFin);
 
 router.get("/:seance_id", authMiddleware, EmargementController.getEmargementsBySeance);
 router.get("/programmes/:programme_id/heures", authMiddleware, EmargementController.getTotalHeuresEffectuees);
