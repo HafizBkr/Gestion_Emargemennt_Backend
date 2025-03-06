@@ -185,3 +185,4 @@ CREATE TABLE emargements (
     FOREIGN KEY (professeur_id) REFERENCES professeurs(id) ON DELETE CASCADE
 );
 
+ALTER TABLE emargements ADD COLUMN type_emargement VARCHAR(10) NOT NULL DEFAULT 'debut';
