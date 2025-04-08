@@ -1,159 +1,146 @@
 # Faculty Attendance System
 
-A digital attendance management system designed for universities, allowing professors to sign in/out and administrators to track teaching hours.
+A comprehensive digital attendance management system for universities, allowing professors to sign in/out and administrators to track teaching hours accurately.
 
-## 🎯 Features
+##  Project Overview
 
-### Professor Dashboard
-- Real-time attendance tracking
-- Personal schedule view (daily/weekly)
-- Teaching hours counter
-- Course history
-- Generated attendance documents
-- Pending notifications
-- Personal statistics (hours per subject, per period)
+The Faculty Attendance System is a modern solution designed to replace traditional paper-based attendance tracking in academic institutions. The system streamlines the process of recording professor attendance, managing teaching schedules, and generating reports for administrative purposes.
 
-### Admin Dashboard
-- Global view of ongoing courses
-- Real-time attendance status
-- Professor status monitoring (teaching, finished, absent)
-- Alerts for delays or missing attendance
-- Administrative management tools
-- Statistical reports and exports
+##  System Architecture
 
-## 🛠 Technical Stack
+This project uses a Node.js/Express.js backend with a PostgreSQL database. The architecture follows a standard MVC pattern with clear separation of concerns:
 
-### Backend
-- Language: Go
-- Database: PostgreSQL
-- Authentication: JWT
-- API: RESTful architecture
+```
+├── app.js                  # Express application setup
+├── config/                 # Configuration files
+├── controllers/            # Business logic handlers
+├── middlewares/            # Authentication and validation middleware
+├── models/                 # Data models
+├── routes/                 # API endpoints
+├── services/               # External services integration
+├── validators/             # Input validation
+└── server.js               # Entry point
+```
 
-### Frontend
-- Framework: React
-- UI Components: Shadcn/UI
-- State Management: React Query
-- Styling: TailwindCSS
+##  Data Models
 
-## 📱 Key Features
+The system is built around the following core data models:
 
-### Attendance Management
-- Digital sign-in/sign-out system
-- Real-time hour tracking
-- Automatic PDF generation
-- WhatsApp notifications
-- Geolocation verification (optional)
+- **Admin**: System administrators with full access rights
+- **Professeur**: Faculty members who use the system to record attendance
+- **Departement**: Academic departments that organize professors and courses
+- **Domain**: Fields of study
+- **Fillieres**: Specific educational programs
+- **Niveau**: Educational levels (L1, L2, L3, M1, M2)
+- **Specialite**: Academic specializations
+- **Programes**: Course schedules
+- **Seance**: Individual teaching sessions
+- **Salles**: Classrooms and lecture halls
+- **Emargement**: Attendance records
+- **Annee**: Academic years
 
-### Course Management
-- Schedule creation and modification
-- Room assignment
-- Course type categorization (Lecture, Tutorial, Lab)
-- Professor assignment
-- Automatic hour calculation
+##  Authentication & Authorization
 
-### Notification System
-- Course reminders (15 minutes before)
-- Missing attendance alerts
-- Weekly hour summaries
-- Teaching quota alerts
+The system implements JWT-based authentication with two distinct roles:
 
-## 🔐 Security Features
-- Secure authentication
-- Role-based access control
-- Digital signatures
-- Activity logging
-- Data encryption
+1. **Administrators**: Full access to all system features including reporting, management, and configuration
+2. **Professors**: Limited access to personal attendance records, schedules, and session management
 
-## 📊 Data Management
-- Automated exports for payroll
-- PDF attendance reports
-- Statistical analysis
-- Data backup system
-- Excel/CSV exports
+##  Key Features
 
-## 💻 API Endpoints
+### For Professors
+- Digital sign-in and sign-out for teaching sessions
+- Personal dashboard with upcoming schedule
+- History of teaching sessions and hours
+- Automatic calculations of teaching load
+- Notifications for upcoming sessions
+
+### For Administrators
+- Comprehensive management of academic entities
+- Real-time monitoring of professor attendance
+- Customizable reports and statistics
+- User management and access control
+- Academic year and semester configuration
+
+##  API Endpoints
+
+Pour une documentation complète des endpoints API, veuillez consulter les fichiers dans le dossier `/routes`. Chaque fichier correspond à une ressource spécifique du système:
+
+- `admin.routes.js` - Gestion des administrateurs
+- `anees.routes.js` - Gestion des années académiques
+- `departement.routes.js` - Gestion des départements
+- `domain.routes.js` - Gestion des domaines d'études
+- `emmargement.routes.js` - Gestion des émargements
+- `fillieres.routes.js` - Gestion des filières
+- `niveau.routes.js` - Gestion des niveaux d'études
+- `professeur.routes.js` - Gestion des professeurs
+- `programes.routes.js` - Gestion des programmes
+- `salles.routes.js` - Gestion des salles
+- `seance.routes.js` - Gestion des séances
+- `specialite.routres.js` - Gestion des spécialités
+
+Voici quelques exemples d'endpoints principaux:
 
 ### Authentication
-```
-POST /api/v1/auth/login
-POST /api/v1/auth/logout
-POST /api/v1/auth/refresh
-```
+- `POST /api/auth/login` - Authentifier les utilisateurs
+- `POST /api/auth/logout` - Terminer la session utilisateur
 
-### Attendance
-```
-POST /api/v1/attendance/signin
-POST /api/v1/attendance/signout
-GET  /api/v1/attendance/history
-```
+### Gestion des émargements
+- `POST /api/emargement/signin` - Enregistrer le début d'une séance
+- `PUT /api/emargement/signout/:id` - Enregistrer la fin d'une séance
+- `GET /api/emargement/professeur/:id` - Obtenir l'historique des présences d'un professeur
+- `GET /api/emargement/export` - Exporter les données d'émargement
 
-### Courses
-```
-GET    /api/v1/courses/today
-GET    /api/v1/courses/week
-POST   /api/v1/courses
-PUT    /api/v1/courses/{id}
-DELETE /api/v1/courses/{id}
-```
+##  Technical Implementation
 
-### Reports
-```
-GET /api/v1/reports/professor/{id}
-GET /api/v1/reports/department
-GET /api/v1/reports/export/pdf
-GET /api/v1/reports/export/excel
-```
+### Backend Technologies
+- **Node.js & Express.js**: Server-side application framework
+- **PostgreSQL**: Relational database management system
+- **JSON Web Tokens**: Secure authentication
+- **Bcrypt**: Password hashing
+- **Sequelize**: ORM for database interaction
 
-## 📁 Project Structure
+### Integration Services
+- Email notifications via Gmail
+- WhatsApp notifications via Twilio API
 
-```
-├── cmd/
-│   └── server/
-├── internal/
-│   ├── models/
-│   ├── handlers/
-│   ├── services/
-│   └── repositories/
-├── pkg/
-│   ├── notification/
-│   ├── pdf/
-│   └── whatsapp/
-└── configs/
-```
-
-## 🚀 Getting Started
+##  Getting Started
 
 1. Clone the repository
-2. Install dependencies
-3. Configure environment variables
-4. Set up the database
-5. Run migrations
-6. Start the server
+2. Install dependencies with `npm install`
+3. Configure environment variables based on `.env.sample`
+4. Initialize the database using `schema.sql`
+5. Generate admin user with `node generate-admin-hash.js`
+6. Start the server with `npm start`
 
-## 📝 Environment Variables
+##  Environment Configuration
 
-```env
+Create a `.env` file based on the provided `.env.sample`:
+
+```
+DB_USER=postgres
+DB_PASSWORD=hafiz
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=attendance_db
-DB_USER=postgres
-DB_PASSWORD=your_password
+DB_NAME=emargement
+DB_SSLMODE=disable
+PORT=3000
+JWT_SECRET=JKDSCNKSDJNLKASSJHDHJSAKJNC
 
-JWT_SECRET=your_secret_key
-WHATSAPP_API_KEY=your_api_key
-
-SERVER_PORT=8080
-ENV=development
+GMAIL_USER=
+GMAIL_PASS=
+TWILIO_ACCOUNT_SID=
+TWILIO_AUTH_TOKEN=
+TWILIO_WHATSAPP_NUMBER=
 ```
 
-## 👥 Contributing
+##  Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE.md file for details
